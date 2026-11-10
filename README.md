@@ -1,4 +1,4 @@
-# agent-library (working name)
+# marionet-agents
 
 An open-source library of focused AI agents that **proves its agents work, on any LLM**, and runs them as **real teams**.
 
