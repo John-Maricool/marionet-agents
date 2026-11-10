@@ -1,0 +1,27 @@
+# Allowed agent frontmatter. The linter rejects any other field.
+
+required: [name, description, team, version, status, model, capabilities, approval_tier]
+
+fields:
+  name: kebab-case, must match the folder name, unique across the library
+  description: one to three sentences on when to use the agent; must end with a "Not for:" line
+  team: must match the team folder
+  role: lead | member (default member)
+  version: semver, e.g. 0.1.0
+  status: draft | verified
+  model: fast | standard | strong
+  capabilities: list of names from capabilities.yaml
+  skills: list of folder names in skills/
+  inputs: list of contract names in contracts/
+  outputs: list of contract names in contracts/
+  handoffs: list of agent names this agent may hand work to
+  approval_tier: 0-4 (0 read-only, 1 drafts, 2 internal changes, 3 needs approval, 4 human only)
+
+required_sections:
+  - Role
+  - Scope
+  - Workflow
+  - Output format
+  - Done when
+  - Escalate when
+  - Guardrails

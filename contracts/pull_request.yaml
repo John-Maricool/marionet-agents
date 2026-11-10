@@ -1,0 +1,4 @@
+name: pull_request
+description: Pull request description for a code change.
+format: markdown
+required_sections: [Summary, Changes, Tests, How to verify, Risks]

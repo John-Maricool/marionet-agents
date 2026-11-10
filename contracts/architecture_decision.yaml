@@ -1,0 +1,4 @@
+name: architecture_decision
+description: Design decision and task breakdown from the system architect.
+format: markdown
+required_sections: [Context, Decision, Options considered, Consequences, Tasks]

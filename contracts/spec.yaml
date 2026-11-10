@@ -1,0 +1,4 @@
+name: spec
+description: Product spec handed to engineering.
+format: markdown
+required_sections: [Goal, Users, Requirements, Acceptance criteria]

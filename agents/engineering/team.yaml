@@ -1,0 +1,12 @@
+team: engineering
+lead: senior-system-architect
+members:
+  - senior-system-architect
+  - senior-backend-engineer
+  # To add: senior-frontend-engineer, senior-mobile-engineer, senior-database-engineer,
+  #         senior-devops-engineer, senior-qa-automation-engineer
+routes:
+  - when: System design, choosing technologies, how services fit together, splitting a feature into tasks
+    to: senior-system-architect
+  - when: APIs, business logic, authentication, third-party integrations, server-side bugs
+    to: senior-backend-engineer

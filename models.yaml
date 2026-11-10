@@ -1,0 +1,31 @@
+# Model tiers. Agents name a tier; each user maps tiers to what they have.
+# Model strings follow LiteLLM naming (provider/model). Check provider docs for current names.
+
+tiers:
+  fast:
+    description: Simple, high-volume tasks.
+  standard:
+    description: Most everyday work.
+  strong:
+    description: Hard reasoning, complex coding, long tasks.
+
+# Default profile: free first.
+profiles:
+  free:
+    fast: ollama/qwen3:8b
+    standard: ollama/qwen3:14b
+    strong: openrouter/free-model-of-your-choice   # set to a current free model
+  anthropic:
+    fast: anthropic/claude-haiku-5-5
+    standard: anthropic/claude-sonnet-5-5
+    strong: anthropic/claude-opus-5-5
+  # Add openai, google, etc. with their current model names.
+
+default_profile: free
+
+# Per-tool model names used by scripts/convert.py.
+tool_models:
+  claude-code:
+    fast: haiku
+    standard: sonnet
+    strong: opus

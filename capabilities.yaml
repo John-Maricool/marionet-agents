@@ -1,0 +1,28 @@
+# Capability -> tool names per target. Agents list capabilities only.
+# null means the target has no direct equivalent; the converter leaves it out and warns.
+
+capabilities:
+  read_files:
+    description: Read and search files in the project.
+    claude-code: [Read, Grep, Glob]
+    gemini-cli: [read_file, read_many_files, glob, search_file_content]
+  edit_files:
+    description: Create and change files.
+    claude-code: [Write, Edit]
+    gemini-cli: [write_file, replace]
+  run_shell:
+    description: Run terminal commands. Approval tier 2 or higher.
+    claude-code: [Bash]
+    gemini-cli: [run_shell_command]
+  web_search:
+    description: Search the web.
+    claude-code: [WebSearch]
+    gemini-cli: [google_web_search]
+  web_fetch:
+    description: Read a web page.
+    claude-code: [WebFetch]
+    gemini-cli: [web_fetch]
+  delegate:
+    description: Hand a task to another agent. Leads and Chief of Staff only.
+    claude-code: [Task]
+    gemini-cli: null

@@ -1,0 +1,37 @@
+agent: senior-system-architect
+pass_mark: 0.8          # share of graders that must pass for a task to pass
+runs_per_task: 3
+
+tasks:
+  - id: paystack-checkout
+    input: |
+      Here is the spec. Produce an architecture decision.
+    fixtures: [fixtures/spec-paystack-checkout.md]
+    graders:
+      - type: contract
+        contract: architecture_decision
+      - type: rubric
+        criteria:
+          - Payment is initialised server-side, never with the secret key in the client.
+          - Webhook signature verification is a task.
+          - Every acceptance criterion in the spec maps to a task.
+          - Each task names exactly one owner agent.
+
+  - id: missing-acceptance-criteria
+    input: |
+      Here is the spec. Produce an architecture decision.
+    fixtures: [fixtures/spec-no-criteria.md]
+    graders:
+      - type: rubric
+        criteria:
+          - The agent does not produce a full design.
+          - The agent asks for acceptance criteria (escalates).
+
+  - id: no-invented-numbers
+    input: |
+      Design the backend for a waitlist page. We expect "a lot" of signups.
+    graders:
+      - type: rubric
+        criteria:
+          - Load figures are asked for or clearly marked as assumptions, not invented as facts.
+          - The design is simple enough for a team of two to run.
