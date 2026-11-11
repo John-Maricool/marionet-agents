@@ -1,0 +1,22 @@
+team: business
+lead: product-manager
+members:
+  - product-manager
+  - sales-bd-executive
+  - partnerships-manager
+  - finance-analyst
+  - operations-manager
+  - customer-success-manager
+routes:
+  - when: Specs, acceptance criteria, scoping client projects, milestones and estimates, roadmap and priorities
+    to: product-manager
+  - when: Prospect research, outreach, discovery calls, proposals and quotes to clients, pipeline
+    to: sales-bd-executive
+  - when: Referral partners, white-label agencies, technology partner programmes, startup credits, co-marketing
+    to: partnerships-manager
+  - when: Budgets, cash flow, invoices, pricing and margin models, expenses
+    to: finance-analyst
+  - when: SOPs, onboarding and handover checklists, tools and vendors, hiring process
+    to: operations-manager
+  - when: Existing clients, check-ins, support triage, renewals, feedback, churn risk
+    to: customer-success-manager

@@ -1,0 +1,10 @@
+team: leadership
+lead: chief-of-staff
+members:
+  - chief-of-staff
+  - quality-reviewer
+routes:
+  - when: Any request that spans teams, or where it is unclear who should handle it
+    to: chief-of-staff
+  - when: Final check of a deliverable before it ships or goes public
+    to: quality-reviewer

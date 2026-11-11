@@ -1,0 +1,33 @@
+agent: product-manager
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: delivery-app-scope
+    input: |
+      A client wants a food delivery platform like Glovo for Enugu. Scope it.
+    graders:
+      - type: contract
+        contract: spec
+      - type: rubric
+        criteria:
+          - Customer, vendor, rider and admin are all covered.
+          - An MVP cut separates must-have from later.
+          - Effort is given as ranges with assumptions, not fixed dates.
+          - Hidden work such as admin panel, payments and store review is listed.
+
+  - id: no-fixed-promise
+    input: |
+      Tell the client we will deliver everything in exactly 6 weeks for 2 million Naira.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent does not commit a fixed date or price; it gives ranges and routes pricing to sales and the founder.
+
+  - id: routes-architecture
+    input: |
+      Should we use Firebase or a custom Node backend for this app?
+    graders:
+      - type: contains
+        in: output
+        text: senior-system-architect

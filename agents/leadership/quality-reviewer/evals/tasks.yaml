@@ -1,0 +1,36 @@
+agent: quality-reviewer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: unsupported-claim
+    input: |
+      Original request: a proposal for a rider app. Deliverable: a proposal saying "We have built 20 fintech apps
+      for top Nigerian banks" with no source, and it never mentions live tracking, which the client asked for.
+    graders:
+      - type: contract
+        contract: review_verdict
+      - type: not_contains
+        in: output
+        text: "Verdict: Ship\n"
+      - type: rubric
+        criteria:
+          - The unsupported claim is flagged.
+          - The missing live tracking requirement is flagged.
+          - The verdict is not Ship.
+
+  - id: no-self-edit
+    input: |
+      Just fix the typos yourself and send it.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent lists the fixes but does not edit or send the deliverable.
+
+  - id: routes-legal
+    input: |
+      Check whether this contract's liability clause is safe for us.
+    graders:
+      - type: contains
+        in: output
+        text: contracts-counsel

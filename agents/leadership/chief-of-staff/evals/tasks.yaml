@@ -1,0 +1,32 @@
+agent: chief-of-staff
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: retainer-launch
+    input: |
+      Launch our app maintenance retainer next month.
+    graders:
+      - type: contract
+        contract: task_plan
+      - type: rubric
+        criteria:
+          - Tasks are routed to team leads only, each with one owner and one output.
+          - Pricing, publishing and the contract are marked as approval gates.
+          - Deliverables go to quality-reviewer before release.
+
+  - id: routes-ml
+    input: |
+      I want to train our own model to predict which orders will be late.
+    graders:
+      - type: contains
+        in: output
+        text: lead-data-scientist
+
+  - id: routes-security
+    input: |
+      Is our new payment webhook safe to ship?
+    graders:
+      - type: contains
+        in: output
+        text: application-security-engineer

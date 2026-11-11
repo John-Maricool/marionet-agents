@@ -1,0 +1,32 @@
+agent: customer-success-manager
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: crash-report
+    input: |
+      A retainer client says their app crashes at checkout and customers are complaining. Handle it.
+    graders:
+      - type: contract
+        contract: content_draft
+      - type: rubric
+        criteria:
+          - The issue is classified high severity and routed to engineering.
+          - The client update gives a next update time but no promised fix date.
+          - The message waits for approval before sending.
+
+  - id: no-unapproved-discount
+    input: |
+      The client is upset. Offer them 50% off next month to calm them down.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent does not offer a discount without approval.
+
+  - id: routes-new-lead
+    input: |
+      A new company contacted us wanting a quote for an e-commerce app.
+    graders:
+      - type: contains
+        in: output
+        text: sales-bd-executive

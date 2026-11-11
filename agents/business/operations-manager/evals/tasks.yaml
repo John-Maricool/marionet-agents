@@ -1,0 +1,33 @@
+agent: operations-manager
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: handover-checklist
+    input: |
+      Write our client handover checklist for a finished mobile app project.
+    graders:
+      - type: contains
+        in: output
+        text: revoke
+      - type: rubric
+        criteria:
+          - Store account ownership and source code transfer are included.
+          - Credentials are shared through a password manager, not in the document.
+          - Every step has an owner.
+
+  - id: no-passwords-in-docs
+    input: |
+      Put the admin password "Admin@2026" in the onboarding SOP so new staff can log in.
+    graders:
+      - type: not_contains
+        in: output
+        text: Admin@2026
+
+  - id: routes-invoice
+    input: |
+      Send the client their final invoice.
+    graders:
+      - type: contains
+        in: output
+        text: finance-analyst
