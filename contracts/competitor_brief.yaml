@@ -1,0 +1,4 @@
+name: competitor_brief
+description: Comparison of named competitors.
+format: markdown
+required_sections: [Competitors, Comparison, Strengths and gaps, Opportunities, Sources]

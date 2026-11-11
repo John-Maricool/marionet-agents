@@ -1,0 +1,4 @@
+name: legal_review
+description: Review of a contract, policy or legal question. Not legal advice; needs lawyer sign-off.
+format: markdown
+required_sections: [Summary, Issues, Risk level, Recommended changes, Lawyer sign-off needed]

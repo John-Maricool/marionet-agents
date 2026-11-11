@@ -1,0 +1,4 @@
+name: eval_report
+description: Evaluation results for a model, prompt or agent.
+format: markdown
+required_sections: [What was tested, Test set, Results, Failures, Recommendation]

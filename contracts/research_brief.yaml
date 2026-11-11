@@ -1,0 +1,4 @@
+name: research_brief
+description: Answer to a research question with evidence.
+format: markdown
+required_sections: [Question, Key findings, Evidence, Confidence, Sources]

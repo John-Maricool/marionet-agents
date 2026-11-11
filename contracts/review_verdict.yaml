@@ -1,0 +1,4 @@
+name: review_verdict
+description: Final quality check before work ships.
+format: markdown
+required_sections: [Verdict, Checked against, Issues, Required fixes]

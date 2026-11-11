@@ -1,0 +1,4 @@
+name: brand_asset
+description: Brand or graphic deliverable.
+format: markdown
+required_sections: [Brief, Concepts, Final assets, Usage notes]

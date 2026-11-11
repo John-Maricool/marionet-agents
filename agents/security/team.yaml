@@ -1,0 +1,16 @@
+team: security
+lead: application-security-engineer
+members:
+  - application-security-engineer
+  - cloud-security-engineer
+  - penetration-tester
+  - security-compliance-officer
+routes:
+  - when: Secure code review, threat models, dependency and secret checks for a feature
+    to: application-security-engineer
+  - when: Cloud access, IAM, secrets managers, public buckets, Firebase rules, network and backup settings
+    to: cloud-security-engineer
+  - when: Authorised testing of our own live or staging systems
+    to: penetration-tester
+  - when: SOC 2, ISO 27001, PCI DSS, security policies, client security questionnaires, audit evidence
+    to: security-compliance-officer

@@ -1,0 +1,4 @@
+name: content_draft
+description: A piece of written content ready for review.
+format: markdown
+required_sections: [Audience, Goal, Draft, Call to action]

@@ -1,0 +1,4 @@
+name: task_plan
+description: Breakdown of a request into routed tasks.
+format: markdown
+required_sections: [Request, Tasks, Owners, Approval gates, Status]

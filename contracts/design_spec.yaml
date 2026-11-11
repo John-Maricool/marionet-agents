@@ -1,0 +1,4 @@
+name: design_spec
+description: Design handoff for a feature or screen.
+format: markdown
+required_sections: [Goal, User flow, Screens, States, Accessibility]

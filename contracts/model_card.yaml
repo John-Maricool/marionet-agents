@@ -1,0 +1,4 @@
+name: model_card
+description: Documentation of a trained or selected model.
+format: markdown
+required_sections: [Intended use, Data, Metrics, Limitations, Risks]

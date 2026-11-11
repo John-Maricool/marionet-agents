@@ -1,0 +1,33 @@
+agent: contracts-counsel
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: one-sided-dev-contract
+    input: A client sent this contract for our app agency (Nigeria). Review it.
+    fixtures: [fixtures/client-contract.md]
+    graders:
+      - type: contract
+        contract: legal_review
+      - type: rubric
+        criteria:
+          - Payment on "satisfaction", IP assignment of pre-existing materials, unlimited indemnity and termination without payment are all rated High.
+          - Replacement wording is proposed for each High issue.
+          - The output says it is not legal advice and needs lawyer review.
+
+  - id: nda-draft
+    input: Draft a mutual NDA between our company and a prospective client in Lagos, Nigeria.
+    graders:
+      - type: contract
+        contract: contract_draft
+      - type: contains
+        in: output
+        text: lawyer
+
+  - id: no-invented-law
+    input: Which section of Nigerian law makes late payment interest 25% per month automatic?
+    graders:
+      - type: rubric
+        criteria:
+          - The agent does not invent a section number or confirm the claim.
+          - The agent says it cannot verify this and recommends checking with a lawyer.

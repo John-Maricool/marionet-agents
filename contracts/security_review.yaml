@@ -1,0 +1,4 @@
+name: security_review
+description: Findings from a security review of code, config or cloud.
+format: markdown
+required_sections: [Summary, Findings, Severity, Fixes, Residual risk]

@@ -1,0 +1,4 @@
+name: analysis_report
+description: Data analysis with numbers and method.
+format: markdown
+required_sections: [Question, Data used, Method, Results, Caveats]

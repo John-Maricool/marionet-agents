@@ -1,0 +1,4 @@
+name: dataset_card
+description: Documentation of a dataset.
+format: markdown
+required_sections: [Source, Collection, Labels, License, Personal data, Known issues]

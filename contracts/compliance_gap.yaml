@@ -1,0 +1,4 @@
+name: compliance_gap
+description: Gap assessment against a security or privacy framework.
+format: markdown
+required_sections: [Framework, Controls in place, Gaps, Remediation plan, Evidence needed]

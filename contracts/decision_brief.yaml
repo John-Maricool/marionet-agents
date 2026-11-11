@@ -1,0 +1,4 @@
+name: decision_brief
+description: Business recommendation for the founder to decide on.
+format: markdown
+required_sections: [Context, Options, Recommendation, Numbers, Next steps]

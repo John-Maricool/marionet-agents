@@ -1,0 +1,4 @@
+name: proposal
+description: Client or partner proposal. Prices need founder approval.
+format: markdown
+required_sections: [Client need, Solution, Scope, Timeline, Price, Next steps]

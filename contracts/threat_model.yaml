@@ -1,0 +1,4 @@
+name: threat_model
+description: Threat model for a system or feature.
+format: markdown
+required_sections: [System, Assets, Threats, Mitigations, Open risks]

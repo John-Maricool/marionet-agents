@@ -1,0 +1,13 @@
+team: legal
+lead: contracts-counsel
+members:
+  - contracts-counsel
+  - corporate-ip-counsel
+  - privacy-regulatory-counsel
+routes:
+  - when: Client, vendor and contractor agreements, NDAs, statements of work, terms of service
+    to: contracts-counsel
+  - when: Company registration and filings, founder and shareholder agreements, equity, trademarks, copyright, open-source licences
+    to: corporate-ip-counsel
+  - when: Privacy policies, consent, data processing agreements, data protection law, sector regulators and licences
+    to: privacy-regulatory-counsel

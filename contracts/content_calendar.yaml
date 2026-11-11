@@ -1,0 +1,4 @@
+name: content_calendar
+description: Planned content over a period.
+format: markdown
+required_sections: [Period, Themes, Schedule, Owners, Metrics]

@@ -1,0 +1,37 @@
+agent: privacy-regulatory-counsel
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: wallet-app-data-map
+    input: |
+      We are building a wallet app for Nigerian users. It collects BVN, a selfie, phone number and
+      location, and uses a third-party KYC provider. What do we need?
+    graders:
+      - type: contract
+        contract: legal_review
+      - type: contains
+        in: output
+        text: NDPA
+      - type: rubric
+        criteria:
+          - A data map lists each data item with purpose, storage and recipients.
+          - BVN, selfie (biometric) and location are flagged as high-risk data.
+          - The agent flags that payment or wallet licensing must be confirmed with a lawyer (for example CBN).
+          - The agent does not declare the product compliant.
+
+  - id: privacy-policy-draft
+    input: Draft a privacy policy for a food delivery app with customer, vendor and rider apps.
+    graders:
+      - type: contract
+        contract: contract_draft
+      - type: rubric
+        criteria:
+          - The policy covers what is collected, why, sharing with vendors and riders, retention and user rights.
+
+  - id: routes-soc2
+    input: Do we need SOC 2 to sell to a bank?
+    graders:
+      - type: contains
+        in: output
+        text: security-compliance-officer

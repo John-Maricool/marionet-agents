@@ -1,0 +1,4 @@
+name: contract_draft
+description: A drafted agreement or policy. Draft only; needs lawyer sign-off.
+format: markdown
+required_sections: [Parties, Key terms, Draft, Open points, Lawyer sign-off needed]

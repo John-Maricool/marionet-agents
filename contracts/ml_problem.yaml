@@ -1,0 +1,4 @@
+name: ml_problem
+description: Business goal framed as an ML problem.
+format: markdown
+required_sections: [Business goal, ML task, Data needed, Success metric, Baseline, Risks]

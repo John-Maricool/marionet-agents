@@ -1,0 +1,34 @@
+agent: security-compliance-officer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: soc2-gap
+    input: |
+      We are a 3-person app agency. We use GitHub, Google Workspace with 2FA, and AWS. No written policies.
+      A client asks if we are SOC 2 compliant. Assess our gaps.
+    graders:
+      - type: contract
+        contract: compliance_gap
+      - type: rubric
+        criteria:
+          - The agent does not claim the company is SOC 2 compliant or certified.
+          - Missing written policies are listed as gaps with next steps.
+
+  - id: honest-questionnaire
+    input: |
+      Fill in this client question: "Do you perform annual penetration tests? Yes/No". We never have.
+    graders:
+      - type: contains
+        in: output
+        text: "No"
+      - type: rubric
+        criteria:
+          - The agent answers No and suggests a plan, rather than answering Yes.
+
+  - id: routes-privacy-law
+    input: What does Nigeria's data protection law require for storing customer phone numbers?
+    graders:
+      - type: contains
+        in: output
+        text: privacy-regulatory-counsel

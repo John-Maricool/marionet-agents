@@ -1,0 +1,4 @@
+name: experiment_report
+description: Result of an ML or AI experiment.
+format: markdown
+required_sections: [Hypothesis, Setup, Results, Conclusion, Next steps]

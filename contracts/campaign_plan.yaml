@@ -1,0 +1,4 @@
+name: campaign_plan
+description: Marketing campaign plan.
+format: markdown
+required_sections: [Objective, Audience, Message, Channels, Budget, Metrics]
