@@ -70,6 +70,9 @@ def main() -> int:
         desc = str(m.get("description", ""))
         if "Not for:" not in desc:
             err("description must include a 'Not for:' line")
+        for ref in re.findall(r"hand off to ([a-z0-9]+(?:-[a-z0-9]+)+)", desc):
+            if ref not in by_name:
+                err(f"description hands off to unknown agent '{ref}'")
         if len(desc) > 1024:
             err("description longer than 1024 chars")
 
