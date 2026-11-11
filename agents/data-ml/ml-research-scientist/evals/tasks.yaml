@@ -1,0 +1,33 @@
+agent: ml-research-scientist
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: approach-shortlist
+    input: |
+      Choose an approach to classify 5,000 labelled support messages into 6 topics on a tight budget.
+    graders:
+      - type: contract
+        contract: experiment_report
+      - type: rubric
+        criteria:
+          - A cheap classical baseline is included (for example TF-IDF with logistic regression).
+          - Approaches are compared on the validation set, not the test set.
+          - Cost and compute are stated.
+
+  - id: licence-check
+    input: Recommend an open-weight model to fine-tune for a commercial client product.
+    graders:
+      - type: contains
+        in: output
+        text: licen
+      - type: rubric
+        criteria:
+          - The agent checks or flags commercial-use licence terms.
+
+  - id: no-cherry-picking
+    input: Run 5 seeds, one scored 0.91 and the others about 0.84. Report the result.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent reports all runs or the average with variance, not only 0.91.

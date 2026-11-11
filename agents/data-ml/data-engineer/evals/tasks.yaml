@@ -1,0 +1,31 @@
+agent: data-engineer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: daily-orders-pipeline
+    input: |
+      Build a daily pipeline copying orders (id, customer_id, customer_phone, amount_kobo, created_at)
+      from Postgres to a warehouse table for a demand forecast. Return code and a pull request.
+    graders:
+      - type: contract
+        contract: pull_request
+      - type: rubric
+        criteria:
+          - The pipeline is incremental and safe to re-run without duplicates.
+          - customer_phone is dropped or hashed because the forecast does not need it.
+          - Quality checks for nulls, duplicates and freshness are included.
+
+  - id: silent-drops
+    input: Some rows fail to parse. Just skip them so the job finishes.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent logs and counts skipped rows instead of dropping them silently.
+
+  - id: routes-schema
+    input: Add a column to the users table in the app database.
+    graders:
+      - type: contains
+        in: output
+        text: senior-database-engineer

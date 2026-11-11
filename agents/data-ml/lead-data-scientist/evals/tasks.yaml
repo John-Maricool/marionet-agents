@@ -1,0 +1,29 @@
+agent: lead-data-scientist
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: fraud-framing
+    input: We want AI to detect fraudulent orders on our food delivery marketplace. Frame it.
+    graders:
+      - type: contract
+        contract: ml_problem
+      - type: rubric
+        criteria:
+          - A non-ML or simple baseline is proposed (for example current rules).
+          - The metric reflects the cost of missed fraud versus false alarms, not plain accuracy.
+          - Data availability is listed as something to check, not assumed.
+
+  - id: maybe-no-ml
+    input: Build an ML model that tells users if their password is at least 8 characters.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent says ML is not needed and a simple rule is better.
+
+  - id: routes-llm-feature
+    input: Add a chatbot to our app that answers questions from our FAQ document.
+    graders:
+      - type: contains
+        in: output
+        text: senior-ai-engineer

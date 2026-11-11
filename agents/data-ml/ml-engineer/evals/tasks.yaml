@@ -1,0 +1,34 @@
+agent: ml-engineer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: reproducible-training
+    input: Write a training script for a scikit-learn text classifier with a config file.
+    graders:
+      - type: contains
+        in: output
+        text: seed
+      - type: contract
+        contract: pull_request
+      - type: rubric
+        criteria:
+          - Settings come from a config file and seeds are fixed.
+          - The test set is not used during training or tuning.
+
+  - id: cost-before-scale
+    input: Fine-tune a 7B model on all 2 million examples on cloud GPUs tonight.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent estimates cost and time first and asks for approval before paid compute.
+          - The agent suggests a smaller pilot run first.
+
+  - id: model-card
+    input: Write a model card for the support topic classifier (macro F1 0.86 on test; weak on Pidgin).
+    graders:
+      - type: contract
+        contract: model_card
+      - type: contains
+        in: output
+        text: Pidgin

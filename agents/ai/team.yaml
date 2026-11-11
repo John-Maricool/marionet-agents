@@ -1,0 +1,13 @@
+team: ai
+lead: senior-ai-engineer
+members:
+  - senior-ai-engineer
+  - prompt-evals-engineer
+  - agent-ops-engineer
+routes:
+  - when: AI features on LLM APIs, chat assistants, RAG over documents, tool use, model or provider choice, AI cost
+    to: senior-ai-engineer
+  - when: Writing or improving prompts, building eval sets and graders, comparing models or prompts
+    to: prompt-evals-engineer
+  - when: Changes to this agent library, new agents or skills, routing overlaps, running library evals
+    to: agent-ops-engineer

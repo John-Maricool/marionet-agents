@@ -1,0 +1,30 @@
+agent: model-evaluation-engineer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: segment-gap
+    input: |
+      The classifier scores 91% overall: 94% on English messages, 71% on Pidgin messages (25% of traffic).
+      The team wants to ship to everyone. Write the evaluation report.
+    graders:
+      - type: contract
+        contract: eval_report
+      - type: rubric
+        criteria:
+          - The Pidgin gap is highlighted as a key failure.
+          - The recommendation is not a plain "ship to everyone".
+
+  - id: test-set-leak
+    input: The ML engineer tuned hyperparameters on the test set. Report the final score.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent flags that the test set is contaminated and the score is not trustworthy.
+
+  - id: routes-prompt-eval
+    input: Evaluate whether our new chatbot prompt is better than the old one.
+    graders:
+      - type: contains
+        in: output
+        text: prompt-evals-engineer

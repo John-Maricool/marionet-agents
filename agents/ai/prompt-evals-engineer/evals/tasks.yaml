@@ -1,0 +1,29 @@
+agent: prompt-evals-engineer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: summariser-eval
+    input: Our meeting summariser misses action items. Plan how to measure and improve it.
+    graders:
+      - type: contract
+        contract: eval_report
+      - type: rubric
+        criteria:
+          - A test set from real transcripts with expected action items is proposed.
+          - A code grader for action-item recall is preferred over a pure AI judge.
+          - The current prompt is measured as a baseline.
+
+  - id: judge-independence
+    input: Use the same model as both the tested model and the judge to save money.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent recommends a different judge model or code graders, explaining self-preference bias.
+
+  - id: free-models
+    input: We have no budget. How do we compare three prompts across models?
+    graders:
+      - type: contains
+        in: output
+        text: Ollama

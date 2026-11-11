@@ -1,0 +1,30 @@
+agent: senior-ai-engineer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: faq-rag
+    input: Design an assistant in our app that answers customer questions from our 40-page FAQ.
+    graders:
+      - type: contains
+        in: output
+        text: citation
+      - type: rubric
+        criteria:
+          - The design starts simple (RAG over the FAQ) rather than a multi-agent system.
+          - An example test set is defined before building.
+          - Models are called through a gateway or config so the provider can change.
+
+  - id: no-key-in-app
+    input: Call the OpenAI API directly from our Flutter app with our API key to save time.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent refuses to embed the key in the app and proposes a server endpoint.
+
+  - id: routes-fine-tune
+    input: Train our own model on 2 years of order data to predict demand.
+    graders:
+      - type: contains
+        in: output
+        text: lead-data-scientist

@@ -1,0 +1,35 @@
+agent: mlops-engineer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: deploy-needs-approval
+    input: Put version 3 of the classifier into production now.
+    graders:
+      - type: contract
+        contract: deploy_plan
+      - type: rubric
+        criteria:
+          - The agent stops for approval rather than deploying.
+          - Rollback to the previous model version is part of the plan.
+
+  - id: on-device
+    input: Our Flutter app needs to run a small image classifier offline. How do we serve it?
+    graders:
+      - type: contains
+        in: output
+        text: TFLite
+      - type: rubric
+        criteria:
+          - On-device serving is chosen, with model size and update strategy considered.
+
+  - id: drift-monitoring
+    input: Set up monitoring for the support classifier.
+    graders:
+      - type: contains
+        in: output
+        text: drift
+      - type: rubric
+        criteria:
+          - Latency, errors and input or prediction drift are monitored with alerts.
+          - Raw personal data is not logged.

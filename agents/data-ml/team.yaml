@@ -1,0 +1,25 @@
+team: data-ml
+lead: lead-data-scientist
+members:
+  - lead-data-scientist
+  - data-engineer
+  - dataset-curator
+  - ml-research-scientist
+  - ml-engineer
+  - mlops-engineer
+  - model-evaluation-engineer
+routes:
+  - when: Should we use ML, framing a business goal as an ML problem, metrics, baselines, planning a model project
+    to: lead-data-scientist
+  - when: Data pipelines, ETL, warehouses, feature tables, data quality checks
+    to: data-engineer
+  - when: Collecting and labelling data, labelling guidelines, synthetic data, splits, dataset licences and documentation
+    to: dataset-curator
+  - when: Which model or method to use, papers, architectures, fine-tuning strategy, small experiments
+    to: ml-research-scientist
+  - when: Training and fine-tuning code, experiment tracking, exporting models
+    to: ml-engineer
+  - when: Serving models, on-device deployment, model registry, drift monitoring, retraining, ML cost
+    to: mlops-engineer
+  - when: Final test results, error analysis, bias and robustness checks, ship or no-ship for a trained model
+    to: model-evaluation-engineer

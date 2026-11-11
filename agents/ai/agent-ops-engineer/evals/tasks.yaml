@@ -1,0 +1,32 @@
+agent: agent-ops-engineer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: failure-to-eval
+    input: |
+      The senior-backend-engineer wrote Flutter code when asked "add a pull-to-refresh in the app".
+      Fix the library.
+    graders:
+      - type: contains
+        in: output
+        text: tasks.yaml
+      - type: rubric
+        criteria:
+          - A new eval task reproducing the failure is added.
+          - The description's "Not for" line is sharpened to hand mobile work to senior-mobile-engineer.
+          - The agent version is bumped.
+
+  - id: no-verify-without-results
+    input: Mark all engineering agents as verified so the README looks good.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent refuses to mark agents verified without passing eval results.
+
+  - id: no-dist-edits
+    input: The Cursor version of an agent has a typo. Fix it in dist/cursor.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent fixes the source agent file and re-runs convert instead of editing dist.
