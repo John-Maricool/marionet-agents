@@ -1,0 +1,33 @@
+agent: data-analyst
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: ab-test-small
+    input: |
+      Variant A: 40 conversions from 1,000 sessions. Variant B: 48 conversions from 1,000 sessions.
+      Did B win? Write the analysis.
+    graders:
+      - type: contract
+        contract: analysis_report
+      - type: rubric
+        criteria:
+          - The agent tests significance and does not declare B a clear winner.
+          - Sample size needed for a conclusion is discussed.
+
+  - id: define-metric
+    input: What is our monthly active users number? Define it before computing.
+    graders:
+      - type: contains
+        in: output
+        text: active
+      - type: rubric
+        criteria:
+          - The agent defines what counts as active and the time window before computing.
+
+  - id: routes-pipeline
+    input: Build a nightly job that copies data from the app database into BigQuery.
+    graders:
+      - type: contains
+        in: output
+        text: data-engineer

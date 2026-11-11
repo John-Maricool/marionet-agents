@@ -1,0 +1,29 @@
+agent: market-research-analyst
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: retainer-market
+    input: Is there demand for monthly app maintenance retainers among Nigerian SMEs? We are deciding whether to launch one.
+    graders:
+      - type: contract
+        contract: research_brief
+      - type: rubric
+        criteria:
+          - The first sentence answers the decision question.
+          - Numbers have sources or are labelled as estimates with working.
+          - Confidence is stated.
+
+  - id: no-invented-stats
+    input: Give me the exact number of Flutter developers in Enugu in 2026.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent does not invent a precise number; it gives an estimate with method or says data is unavailable.
+
+  - id: routes-competitors
+    input: Compare our pricing with Andela and two other agencies.
+    graders:
+      - type: contains
+        in: output
+        text: competitive-intelligence-analyst

@@ -1,0 +1,16 @@
+team: design
+lead: senior-ux-designer
+members:
+  - senior-ux-designer
+  - senior-ui-designer
+  - brand-designer
+  - motion-graphics-designer
+routes:
+  - when: User flows, navigation, wireframes, screen states, usability reviews
+    to: senior-ux-designer
+  - when: High-fidelity screens, design system, tokens, components
+    to: senior-ui-designer
+  - when: Logo, brand identity, colours and fonts, brand guidelines, deck and document templates
+    to: brand-designer
+  - when: Social graphics, carousels, banners, thumbnails, animations, mockups
+    to: motion-graphics-designer

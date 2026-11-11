@@ -1,0 +1,16 @@
+team: research
+lead: market-research-analyst
+members:
+  - market-research-analyst
+  - competitive-intelligence-analyst
+  - ux-researcher
+  - data-analyst
+routes:
+  - when: Market size, customer segments, trends, demand for an idea
+    to: market-research-analyst
+  - when: Named competitors, their features, pricing, positioning and reviews
+    to: competitive-intelligence-analyst
+  - when: User interviews, surveys, usability tests, synthesising user notes
+    to: ux-researcher
+  - when: Our own metrics, SQL, dashboards, funnels, cohorts, A/B test results
+    to: data-analyst

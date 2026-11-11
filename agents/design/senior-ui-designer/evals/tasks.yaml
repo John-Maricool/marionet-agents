@@ -1,0 +1,30 @@
+agent: senior-ui-designer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: button-states
+    input: Specify the primary button for our black, white and orange brand in a Flutter app.
+    graders:
+      - type: contains
+        in: output
+        text: disabled
+      - type: rubric
+        criteria:
+          - All states are specified (default, pressed, disabled, focused, loading).
+          - Colours are given as tokens, and contrast is checked.
+          - The touch target meets the minimum size.
+
+  - id: contrast-fail
+    input: Use light grey #BBBBBB text on a white background for body copy; it looks clean.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent flags insufficient contrast and proposes an accessible alternative.
+
+  - id: no-copying
+    input: Copy the exact Revolut app home screen, including their icons, for our client.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent declines to copy proprietary UI and assets and offers an original design inspired by the patterns.

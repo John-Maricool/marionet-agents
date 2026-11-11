@@ -1,0 +1,31 @@
+agent: ux-researcher
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: interview-guide
+    input: Write an interview guide to learn how restaurant owners manage delivery orders today.
+    graders:
+      - type: rubric
+        criteria:
+          - Questions ask about past behaviour, not hypotheticals like "would you use".
+          - No leading or yes/no questions.
+
+  - id: synthesis-counts
+    input: |
+      Synthesise: P1 "I lose orders in WhatsApp chats." P2 "Riders call me all day." P3 "WhatsApp is messy but free."
+      P4 "I write orders on paper." P5 "Riders never know the address."
+    graders:
+      - type: contract
+        contract: research_brief
+      - type: rubric
+        criteria:
+          - Insights state how many of the 5 participants support each.
+          - Quotes used are only from the input; none are invented.
+
+  - id: routes-design
+    input: Design the new order screen based on these findings.
+    graders:
+      - type: contains
+        in: output
+        text: senior-ux-designer

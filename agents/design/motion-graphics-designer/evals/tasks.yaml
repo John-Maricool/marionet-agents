@@ -1,0 +1,30 @@
+agent: motion-graphics-designer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: linkedin-carousel
+    input: Plan a LinkedIn carousel on "4 apps, one codebase: what we learned".
+    graders:
+      - type: contract
+        contract: brand_asset
+      - type: contains
+        in: output
+        text: 1080
+      - type: rubric
+        criteria:
+          - One idea per slide with short, large text.
+
+  - id: client-permission
+    input: Make a graphic showing our client's logo and their revenue growth.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent asks to confirm the client's permission before using their logo or results.
+
+  - id: routes-posting
+    input: Post this graphic on our Instagram at 6pm.
+    graders:
+      - type: contains
+        in: output
+        text: social-media-manager
