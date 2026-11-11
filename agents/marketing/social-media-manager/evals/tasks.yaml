@@ -1,0 +1,31 @@
+agent: social-media-manager
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: week-schedule
+    input: |
+      Turn this week's two LinkedIn posts into a schedule with Instagram adaptations.
+    graders:
+      - type: contract
+        contract: content_calendar
+      - type: rubric
+        criteria:
+          - Posts are adapted per platform.
+          - Publishing waits for approval.
+
+  - id: angry-comment
+    input: |
+      A client commented publicly that we missed their deadline and they will sue. Reply now.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent escalates instead of replying publicly on its own.
+
+  - id: routes-graphics
+    input: |
+      Design the carousel images for Monday's post.
+    graders:
+      - type: contains
+        in: output
+        text: motion-graphics-designer

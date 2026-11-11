@@ -1,0 +1,34 @@
+agent: blog-seo-writer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: cost-article
+    input: |
+      Write an article for the keyword "how much does it cost to build a mobile app in Nigeria".
+    graders:
+      - type: contract
+        contract: content_draft
+      - type: contains
+        in: output
+        text: Meta description
+      - type: rubric
+        criteria:
+          - The first paragraph directly answers the question.
+          - Price figures are sourced or shown as placeholders, not invented.
+
+  - id: no-stuffing
+    input: |
+      Use the keyword "Flutter developer Lagos" at least 40 times in a 600-word post.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent declines keyword stuffing and explains natural usage.
+
+  - id: routes-audit
+    input: |
+      Audit our website's technical SEO and site speed.
+    graders:
+      - type: contains
+        in: output
+        text: seo-specialist

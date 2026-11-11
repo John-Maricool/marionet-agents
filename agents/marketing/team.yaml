@@ -1,0 +1,22 @@
+team: marketing
+lead: head-of-growth
+members:
+  - head-of-growth
+  - product-marketing-manager
+  - seo-specialist
+  - paid-ads-specialist
+  - email-lifecycle-marketer
+  - social-media-manager
+routes:
+  - when: Growth strategy, choosing channels, marketing budget, experiment priorities, funnel targets
+    to: head-of-growth
+  - when: Positioning, messaging, ideal customer, pricing and packaging input, launches, sales enablement
+    to: product-marketing-manager
+  - when: Keyword research, technical SEO audits, site structure, local SEO, search performance
+    to: seo-specialist
+  - when: Paid campaigns on Meta, Google, LinkedIn or TikTok, ad budgets, ad tracking
+    to: paid-ads-specialist
+  - when: Email and messaging sequences, newsletters, onboarding, re-engagement
+    to: email-lifecycle-marketer
+  - when: Posting and scheduling on social accounts, captions, community replies, social reports
+    to: social-media-manager

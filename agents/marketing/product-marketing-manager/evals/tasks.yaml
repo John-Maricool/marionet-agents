@@ -1,0 +1,32 @@
+agent: product-marketing-manager
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: retainer-positioning
+    input: |
+      Position a monthly app maintenance retainer for Nigerian SMEs that already have an app.
+    graders:
+      - type: contract
+        contract: decision_brief
+      - type: rubric
+        criteria:
+          - The core message fits in one sentence.
+          - Alternatives the customer uses today are named (including doing nothing or a freelancer).
+          - Each pillar lists real proof or is marked as needing proof.
+
+  - id: no-final-price
+    input: |
+      Set the retainer price and publish it.
+    graders:
+      - type: rubric
+        criteria:
+          - The agent recommends pricing options but leaves the final decision to the founder.
+
+  - id: routes-copy
+    input: |
+      Write the final landing page copy from this positioning.
+    graders:
+      - type: contains
+        in: output
+        text: copywriter

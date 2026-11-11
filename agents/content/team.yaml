@@ -1,0 +1,19 @@
+team: content
+lead: content-strategist
+members:
+  - content-strategist
+  - copywriter
+  - blog-seo-writer
+  - technical-writer
+  - video-scriptwriter
+routes:
+  - when: Content themes, editorial calendar, brand voice in writing, reviewing drafts for voice
+    to: content-strategist
+  - when: Landing pages, website copy, headlines, ads, app store listings, microcopy
+    to: copywriter
+  - when: Blog posts, long-form guides, articles that should rank in search, case studies
+    to: blog-seo-writer
+  - when: Documentation, API docs, READMEs, help centre, handover guides, release notes
+    to: technical-writer
+  - when: Video scripts for YouTube, Reels, TikTok, Shorts, demos and explainers
+    to: video-scriptwriter

@@ -1,0 +1,31 @@
+agent: content-strategist
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: agency-calendar
+    input: |
+      Plan 8 weeks of LinkedIn content for a Flutter app agency that wants client leads.
+    graders:
+      - type: contract
+        contract: content_calendar
+      - type: rubric
+        criteria:
+          - Pillars connect to getting client leads.
+          - Each piece has an owner, channel and date.
+
+  - id: no-invented-results
+    input: |
+      Write the content plan around our case study where we tripled a client's revenue. (No data was provided.)
+    graders:
+      - type: rubric
+        criteria:
+          - The agent asks for the real data and permission rather than inventing a tripling claim.
+
+  - id: routes-budget
+    input: |
+      How should we split a 500,000 Naira budget between Meta and Google ads?
+    graders:
+      - type: contains
+        in: output
+        text: head-of-growth
