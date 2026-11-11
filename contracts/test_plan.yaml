@@ -1,0 +1,4 @@
+name: test_plan
+description: Test plan from QA.
+format: markdown
+required_sections: [Scope, Test cases, Priority, Automation status]

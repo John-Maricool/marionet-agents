@@ -2,11 +2,24 @@ team: engineering
 lead: senior-system-architect
 members:
   - senior-system-architect
+  - senior-frontend-engineer
   - senior-backend-engineer
-  # To add: senior-frontend-engineer, senior-mobile-engineer, senior-database-engineer,
-  #         senior-devops-engineer, senior-qa-automation-engineer
+  - senior-mobile-engineer
+  - senior-database-engineer
+  - senior-devops-engineer
+  - senior-qa-automation-engineer
 routes:
   - when: System design, choosing technologies, how services fit together, splitting a feature into tasks
     to: senior-system-architect
+  - when: Web pages, components, browser UI bugs, web performance and accessibility
+    to: senior-frontend-engineer
   - when: APIs, business logic, authentication, third-party integrations, server-side bugs
     to: senior-backend-engineer
+  - when: Android or iOS app code, Flutter or React Native, mobile UI, payments SDKs, maps, push, real-time in the app
+    to: senior-mobile-engineer
+  - when: Schema design, migrations, slow queries, indexes
+    to: senior-database-engineer
+  - when: CI/CD, deploys, cloud infrastructure, monitoring, backups, app signing and store build pipelines
+    to: senior-devops-engineer
+  - when: Test plans, automated tests, regression runs, reproducing bugs before a release
+    to: senior-qa-automation-engineer

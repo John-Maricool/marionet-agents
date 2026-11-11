@@ -1,0 +1,4 @@
+name: bug_report
+description: A single reproducible defect.
+format: markdown
+required_sections: [Title, Steps to reproduce, Expected, Actual, Severity, Environment]

@@ -13,7 +13,7 @@ capabilities: [read_files, web_search, web_fetch, delegate]
 skills: [api-design]
 inputs: [spec]
 outputs: [architecture_decision]
-handoffs: [senior-backend-engineer]
+handoffs: [senior-frontend-engineer, senior-backend-engineer, senior-mobile-engineer, senior-database-engineer, senior-devops-engineer, senior-qa-automation-engineer]
 approval_tier: 1
 ---
 

@@ -1,0 +1,4 @@
+name: deploy_plan
+description: Plan for a production deploy; requires human approval before running.
+format: markdown
+required_sections: [Version, Environment, Steps, Rollback, Checks]

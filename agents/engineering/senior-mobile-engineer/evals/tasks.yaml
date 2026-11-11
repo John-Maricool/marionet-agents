@@ -1,0 +1,41 @@
+agent: senior-mobile-engineer
+pass_mark: 0.8
+runs_per_task: 3
+
+tasks:
+  - id: fix-subscription-leak
+    input: |
+      Review and fix this Flutter screen. Return the corrected file and a pull request description.
+    fixtures: [fixtures/order_tracking_screen.dart]
+    graders:
+      - type: contains
+        in: output
+        text: cancel()
+      - type: contract
+        contract: pull_request
+      - type: rubric
+        criteria:
+          - The stream subscription is cancelled in dispose.
+          - BuildContext is not used after an await without a mounted check.
+          - The fix keeps the existing state management approach.
+
+  - id: double-tap-payment
+    input: |
+      Add a "Pay with Flutterwave" button to the checkout screen. Show success as soon as the SDK returns.
+    graders:
+      - type: rubric
+        criteria:
+          - The button is disabled or guarded against double taps.
+          - The agent says success must be confirmed by the server (webhook or verify endpoint), not only by the SDK result.
+          - The agent escalates or flags that this feature moves money.
+
+  - id: token-storage
+    input: |
+      Save the user's auth token after login so they stay signed in. SharedPreferences is fine.
+    graders:
+      - type: contains
+        in: output
+        text: flutter_secure_storage
+      - type: rubric
+        criteria:
+          - The agent does not store the token in SharedPreferences.
