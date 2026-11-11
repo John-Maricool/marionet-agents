@@ -4,7 +4,7 @@ runs_per_task: 3
 
 tasks:
   - id: linkedin-carousel
-    input: Plan a LinkedIn carousel on "4 apps, one codebase: what we learned".
+    input: "Plan a LinkedIn carousel titled: 4 apps, one codebase, what we learned."
     graders:
       - type: contract
         contract: brand_asset

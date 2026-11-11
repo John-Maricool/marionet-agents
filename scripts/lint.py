@@ -4,6 +4,8 @@ from __future__ import annotations
 import re
 import sys
 
+import yaml
+
 from library import ROOT, load_library, load_yaml
 
 KEBAB = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -106,7 +108,11 @@ def main() -> int:
         if not a.evals_path.exists():
             err("missing evals/tasks.yaml")
             continue
-        ev = load_yaml(a.evals_path)
+        try:
+            ev = load_yaml(a.evals_path)
+        except yaml.YAMLError as e:
+            err(f"evals/tasks.yaml is not valid YAML: {str(e).splitlines()[-1].strip()}")
+            continue
         tasks = ev.get("tasks") or []
         need = MIN_TASKS_VERIFIED if m.get("status") == "verified" else MIN_TASKS_DRAFT
         if len(tasks) < need:

@@ -67,16 +67,19 @@ def load_library(root: Path = ROOT) -> Library:
         try:
             meta, body = split_frontmatter(skill_md.read_text(encoding="utf-8"))
             lib.skills[skill_md.parent.name] = (meta, body, skill_md.parent)
-        except ValueError as e:
+        except (ValueError, yaml.YAMLError) as e:
             lib.load_errors.append(f"{skill_md.relative_to(root)}: {e}")
     for team_dir in sorted(p for p in (root / "agents").iterdir() if p.is_dir()):
         team_file = team_dir / "team.yaml"
         if team_file.exists():
-            lib.teams[team_dir.name] = load_yaml(team_file)
+            try:
+                lib.teams[team_dir.name] = load_yaml(team_file)
+            except yaml.YAMLError as e:
+                lib.load_errors.append(f"{team_file.relative_to(root)}: not valid YAML: {str(e).splitlines()[-1].strip()}")
         for agent_md in sorted(team_dir.glob("*/agent.md")):
             try:
                 meta, body = split_frontmatter(agent_md.read_text(encoding="utf-8"))
                 lib.agents.append(Agent(agent_md, team_dir.name, agent_md.parent.name, meta, body))
-            except ValueError as e:
+            except (ValueError, yaml.YAMLError) as e:
                 lib.load_errors.append(f"{agent_md.relative_to(root)}: {e}")
     return lib
