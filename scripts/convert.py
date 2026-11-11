@@ -105,11 +105,35 @@ def build_codex(lib: Library, out: Path, warn) -> None:
     copy_skills(lib, out / ".agents" / "skills")
 
 
+def build_prompts(lib: Library, out: Path, warn) -> None:
+    """One self-contained system prompt per agent, with its skills inlined.
+
+    Paste into ChatGPT (custom GPT or project instructions), Claude.ai (project instructions),
+    Gemini (Gem instructions), or send as the system message to any LLM API.
+    """
+    for a in lib.agents:
+        parts = [
+            f"<!-- {HEADER} -->",
+            f"# {a.name}",
+            "",
+            f"> {one_line(a.meta['description'])}",
+            "",
+            a.body.strip(),
+        ]
+        for s in a.meta.get("skills") or []:
+            _, skill_body, _ = lib.skills[s]
+            parts += ["", "---", "", f"<!-- skill: {s} -->", skill_body.strip()]
+        path = out / a.team_dir / f"{a.name}.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("\n".join(parts) + "\n", encoding="utf-8")
+
+
 TARGETS = {
     "claude-code": build_claude_code,
     "cursor": build_cursor,
     "gemini-cli": build_gemini_cli,
     "codex": build_codex,
+    "prompts": build_prompts,
 }
 
 

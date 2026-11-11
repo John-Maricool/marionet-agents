@@ -18,6 +18,13 @@ jobs:
         run: python scripts/lint.py
       - name: Convert to every target
         run: python scripts/convert.py
+      - name: Install script works for every tool
+        run: |
+          mkdir -p /tmp/project
+          for tool in claude-code cursor gemini-cli codex prompts; do
+            python scripts/install.py --tool "$tool" --dest /tmp/project
+          done
+          python scripts/install.py --tool claude-code --team engineering --dest /tmp/project --dry-run
       - name: Roster is up to date
         run: |
           python scripts/roster.py
