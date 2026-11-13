@@ -1,0 +1,3 @@
+-r requirements.txt
+litellm>=1.70
+pytest>=8.0

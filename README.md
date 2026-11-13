@@ -197,7 +197,15 @@ Every agent has at least 3 eval tasks in `agents/<team>/<agent>/evals/tasks.yaml
 
 Grading prefers code checks (tests pass, required sections present, text included or excluded) over AI judges.
 
-**Status:** all 51 agents are `draft`. An agent becomes `verified` after passing 10+ eval tasks. The eval runner, starting with free local models, is the next milestone; results will be published as a leaderboard of agents × models.
+Run them yourself for free (a local model via Ollama plus Google's free Gemini tier): see **[EVALS.md](EVALS.md)**.
+
+```bash
+python scripts/eval.py --team engineering --model ollama_chat/qwen3:8b --judge gemini/gemini-2.5-flash --allow-commands
+```
+
+Each run writes a report with a leaderboard, a scorecard per agent and every failure with its reason.
+
+**Status:** all 51 agents are `draft`. An agent becomes `verified` after passing 10+ eval tasks; the first results will be published as a leaderboard of agents × models.
 
 ---
 
@@ -245,6 +253,7 @@ scripts/install.py                 # install into your tool
 scripts/convert.py                 # build every tool's files into dist/
 scripts/lint.py                    # validate everything
 scripts/roster.py                  # regenerate ROSTER.md
+scripts/eval.py                    # run eval tasks on any model and write a report
 ```
 
 ## License

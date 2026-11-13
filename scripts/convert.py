@@ -112,20 +112,18 @@ def build_prompts(lib: Library, out: Path, warn) -> None:
     Gemini (Gem instructions), or send as the system message to any LLM API.
     """
     for a in lib.agents:
-        parts = [
-            f"<!-- {HEADER} -->",
-            f"# {a.name}",
-            "",
-            f"> {one_line(a.meta['description'])}",
-            "",
-            a.body.strip(),
-        ]
-        for s in a.meta.get("skills") or []:
-            _, skill_body, _ = lib.skills[s]
-            parts += ["", "---", "", f"<!-- skill: {s} -->", skill_body.strip()]
         path = out / a.team_dir / f"{a.name}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("\n".join(parts) + "\n", encoding="utf-8")
+        path.write_text(f"<!-- {HEADER} -->\n" + system_prompt(lib, a), encoding="utf-8")
+
+
+def system_prompt(lib: Library, a: Agent) -> str:
+    """The agent's full instructions with its skills inlined (used by prompts export and evals)."""
+    parts = [f"# {a.name}", "", f"> {one_line(a.meta['description'])}", "", a.body.strip()]
+    for s in a.meta.get("skills") or []:
+        _, skill_body, _ = lib.skills[s]
+        parts += ["", "---", "", f"<!-- skill: {s} -->", skill_body.strip()]
+    return "\n".join(parts) + "\n"
 
 
 TARGETS = {

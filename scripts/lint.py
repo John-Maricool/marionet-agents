@@ -138,6 +138,11 @@ def main() -> int:
                     err(f"evals/{tid}: unknown grader type '{g.get('type')}'")
                 if g.get("type") == "contract" and g.get("contract") not in lib.contracts:
                     err(f"evals/{tid}: unknown contract '{g.get('contract')}'")
+                for hf in g.get("with_files") or []:
+                    if not (a.evals_path.parent / hf).exists():
+                        err(f"evals/{tid}: hidden file not found '{hf}'")
+                if g.get("type") == "command" and not g.get("run"):
+                    err(f"evals/{tid}: command grader needs 'run'")
             if graders and all(g.get("type") == "rubric" for g in graders):
                 warnings.append(f"{where}: evals/{tid} uses only AI-judged rubrics; add a code check if possible")
 
