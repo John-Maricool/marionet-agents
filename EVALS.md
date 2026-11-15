@@ -53,7 +53,7 @@ To keep it for future Terminal windows, add that line to `~/.zshrc`. **Never** p
 python scripts/eval.py --list-models gemini
 ```
 
-Pick a **Flash** model from the list (for example `gemini/gemini-2.5-flash`, or whatever newer Flash version appears). Use that exact name in the commands below. Free-tier limits change; check them in AI Studio.
+Pick a **Flash** model from the list (at the time of writing, `gemini/gemini-3.8-flash`). Use that exact name in the commands below. Google retires old models: if a run says a model is "no longer available", run this command again and use the newer Flash name it shows. Free-tier limits change; check them in AI Studio.
 
 ---
 
@@ -65,7 +65,7 @@ One agent, one run per task, to check everything works:
 
 ```bash
 python scripts/eval.py --agent senior-backend-engineer \
-  --model ollama_chat/qwen3:8b --judge gemini/gemini-2.5-flash \
+  --model ollama_chat/qwen3:8b --judge gemini/gemini-3.8-flash \
   --runs 1 --allow-commands
 ```
 
@@ -73,7 +73,7 @@ python scripts/eval.py --agent senior-backend-engineer \
 
 ```bash
 python scripts/eval.py --team engineering \
-  --model ollama_chat/qwen3:8b --judge gemini/gemini-2.5-flash \
+  --model ollama_chat/qwen3:8b --judge gemini/gemini-3.8-flash \
   --allow-commands --sleep 2
 ```
 
@@ -81,7 +81,7 @@ python scripts/eval.py --team engineering \
 
 ```bash
 python scripts/eval.py --team engineering \
-  --model gemini/gemini-2.5-flash --judge ollama_chat/qwen3:8b \
+  --model gemini/gemini-3.8-flash --judge ollama_chat/qwen3:8b \
   --allow-commands --sleep 5
 ```
 

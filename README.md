@@ -200,7 +200,7 @@ Grading prefers code checks (tests pass, required sections present, text include
 Run them yourself for free (a local model via Ollama plus Google's free Gemini tier): see **[EVALS.md](EVALS.md)**.
 
 ```bash
-python scripts/eval.py --team engineering --model ollama_chat/qwen3:8b --judge gemini/gemini-2.5-flash --allow-commands
+python scripts/eval.py --team engineering --model ollama_chat/qwen3:8b --judge gemini/gemini-3.8-flash --allow-commands
 ```
 
 Each run writes a report with a leaderboard, a scorecard per agent and every failure with its reason.

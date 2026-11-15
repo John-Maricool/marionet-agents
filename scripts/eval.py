@@ -1,8 +1,8 @@
 """Run agents' eval tasks on any LLM, grade the answers, and write a report.
 
 Examples:
-  python scripts/eval.py --team engineering --model ollama_chat/qwen3:8b --judge gemini/gemini-2.5-flash
-  python scripts/eval.py --agent senior-mobile-engineer --model gemini/gemini-2.5-flash --judge ollama_chat/qwen3:8b --sleep 5
+  python scripts/eval.py --team engineering --model ollama_chat/qwen3:8b --judge gemini/gemini-3.8-flash
+  python scripts/eval.py --agent senior-mobile-engineer --model gemini/gemini-3.8-flash --judge ollama_chat/qwen3:8b --sleep 5
   python scripts/eval.py --team engineering --model ollama_chat/qwen3:8b --runs 1 --allow-commands
   python scripts/eval.py --list-models gemini
 
@@ -124,7 +124,9 @@ def build_user_message(task: dict, files: dict[str, str]) -> str:
     if wants_files:
         note = "\n## How to return files\nIf you create or change files, include the COMPLETE new content of each file "
         note += "in a block that starts with ```file:<path> (for example ```file:app.py) and ends with ```. "
-        note += "Files you do not include stay unchanged."
+        note += "Files you do not include stay unchanged. "
+        note += "Each file block REPLACES the whole file, so always return the entire file, including every "
+        note += "function and import you did not change. Never return only the changed part."
         if command:
             note += f" Your files will be checked by running `{command['run']}` in a folder containing these files."
         parts.append(note)
