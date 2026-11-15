@@ -32,7 +32,8 @@ from pathlib import Path
 from convert import system_prompt
 from library import ROOT, load_library, load_yaml
 
-FILE_BLOCK = re.compile(r"```file:\s*([^\n`]+)\n(.*?)```", re.S)
+FENCE = re.compile(r"```([^\n`]*)\n(.*?)```", re.S)
+PATHLIKE = re.compile(r"^[\w./-]+\.\w+$")
 THINK = re.compile(r"<think>.*?</think>", re.S | re.I)
 CODE_GRADERS = {"contract", "contains", "not_contains", "command"}
 MAX_FIXTURE_CHARS = 40_000
@@ -131,7 +132,19 @@ def build_user_message(task: dict, files: dict[str, str]) -> str:
 
 
 def changed_files(answer: str) -> dict[str, str]:
-    return {p.strip(): body for p, body in FILE_BLOCK.findall(answer)}
+    """Files the model returned. Accepts ```file:app.py, ```python file:app.py, ```python:app.py and ```app.py."""
+    files: dict[str, str] = {}
+    for info, body in FENCE.findall(answer):
+        info = info.strip()
+        m = re.search(r"file:\s*(\S+)", info)
+        if m:
+            path = m.group(1)
+        else:
+            last = re.split(r"[\s:]+", info)[-1] if info else ""
+            path = last if PATHLIKE.match(last) else ""
+        if path:
+            files[path] = body
+    return files
 
 
 # ---------------------------------------------------------------- graders
@@ -212,8 +225,11 @@ def grade_rubric(g: dict, task: dict, answer: str, ctx: dict) -> dict:
         ctx["usage"]["judge_calls"] += 1
         match = re.search(r"\{.*\}", out["text"], re.S)
         results = json.loads(match.group(0))["results"] if match else []
-    except Exception as e:  # noqa: BLE001 - any judge failure is recorded, not fatal
-        return {"pass": False, "score": 0.0, "detail": f"judge error: {e}"[:300]}
+    except Exception as e:  # noqa: BLE001 - a judge failure is a grading problem, not the agent's fault
+        return {"pass": None, "score": None, "grading_error": True, "detail": f"examiner error: {e}"[:300]}
+    if not results:
+        return {"pass": None, "score": None, "grading_error": True,
+                "detail": f"examiner gave no usable answer: {out['text'][:200]}"}
     passed = {int(r.get("criterion", 0)): bool(r.get("pass")) for r in results if isinstance(r, dict)}
     reasons = {int(r.get("criterion", 0)): str(r.get("reason", "")) for r in results if isinstance(r, dict)}
     score = sum(passed.get(i, False) for i in range(1, len(criteria) + 1)) / max(len(criteria), 1)
@@ -232,7 +248,10 @@ def run_task(agent, task: dict, model: str, ctx: dict, system: str) -> dict:
     files = fixture_files(agent.evals_path.parent, task.get("fixtures") or [])
     ctx["fixtures"] = files
     ctx["evals_dir"] = agent.evals_path.parent
-    messages = [{"role": "system", "content": system}, {"role": "user", "content": build_user_message(task, files)}]
+    user = build_user_message(task, files)
+    if ctx.get("no_think"):
+        user += "\n\n/no_think"  # Qwen3 switch: answer without a long thinking phase
+    messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
     record = {"agent": agent.name, "task": task["id"], "model": model, "graders": []}
     try:
         out = call_model(model, messages, ctx["temperature"])
@@ -258,8 +277,10 @@ def run_task(agent, task: dict, model: str, ctx: dict, system: str) -> dict:
             else:
                 rubric_ok = False
     graded = [r for r in record["graders"] if r["pass"] is not None]
-    record["passed"] = bool(graded) and code_ok and rubric_ok
-    record["skipped"] = not graded
+    record["grading_errors"] = [r["detail"] for r in record["graders"] if r.get("grading_error")]
+    record["passed"] = bool(graded) and code_ok and rubric_ok and not record["grading_errors"]
+    record["incomplete"] = bool(record["grading_errors"]) and code_ok
+    record["skipped"] = not graded and not record["grading_errors"]
     return record
 
 
@@ -275,6 +296,7 @@ def main() -> int:
     p.add_argument("--allow-commands", action="store_true", help="run command graders (executes test commands on model-written files in a temp folder)")
     p.add_argument("--sleep", type=float, default=0, help="seconds to wait between calls (for free-tier rate limits)")
     p.add_argument("--out", default="", help="results folder (default: results/<date-time>)")
+    p.add_argument("--no-think", action="store_true", help="ask Qwen3 models to skip their long thinking phase (much faster)")
     p.add_argument("--list-models", choices=["gemini"], help="list models available to your key")
     args = p.parse_args()
 
@@ -299,7 +321,7 @@ def main() -> int:
     raw_path = out_dir / "raw.jsonl"
 
     ctx = {"contracts": lib.contracts, "judge": args.judge, "allow_commands": args.allow_commands,
-           "temperature": args.temperature, "sleep": args.sleep, "pass_mark": 0.8,
+           "temperature": args.temperature, "sleep": args.sleep, "pass_mark": 0.8, "no_think": args.no_think,
            "usage": {"calls": 0, "judge_calls": 0, "tokens": 0}}
     records: list[dict] = []
     total = sum(len([t for t in load_yaml(a.evals_path)["tasks"] if not task_ids or t["id"] in task_ids]) for a in agents)
@@ -320,7 +342,8 @@ def main() -> int:
                         rec.update(run=run, version=agent.meta.get("version"))
                         records.append(rec)
                         raw.write(json.dumps(rec, ensure_ascii=False) + "\n")
-                        mark = "SKIP" if rec.get("skipped") else ("PASS" if rec["passed"] else "FAIL")
+                        mark = ("SKIP" if rec.get("skipped") else "PASS" if rec["passed"]
+                                else "INCOMPLETE (examiner error)" if rec.get("incomplete") else "FAIL")
                         print(f"[{done}/{total}] {agent.name} / {task['id']} / {model} / run {run}: {mark}", flush=True)
                         if args.sleep:
                             time.sleep(args.sleep)
@@ -343,16 +366,18 @@ def summarise(records: list[dict], models: list[str]) -> dict:
         t = a["tasks"].setdefault(r["task"], {"runs": 0, "passed": 0, "skipped": 0})
         t["runs"] += 1
         t["passed"] += int(r["passed"])
-        t["skipped"] += int(bool(r.get("skipped")))
+        # runs the examiner could not grade (and that passed every code check) do not count either way
+        t["skipped"] += int(bool(r.get("skipped") or r.get("incomplete")))
         a["seconds"] += r.get("seconds", 0)
         a["tokens"] += r.get("tokens", 0)
     for agent in by.values():
         for m in agent.values():
             graded = {k: v for k, v in m["tasks"].items() if v["skipped"] < v["runs"]}
             m["tasks_total"] = len(graded)
-            m["tasks_passed"] = sum(v["passed"] * 2 > v["runs"] for v in graded.values())
-            m["tasks_reliable"] = sum(v["passed"] == v["runs"] for v in graded.values())
-            runs = sum(v["runs"] for v in graded.values())
+            eff = {k: v["runs"] - v["skipped"] for k, v in graded.items()}
+            m["tasks_passed"] = sum(v["passed"] * 2 > eff[k] for k, v in graded.items())
+            m["tasks_reliable"] = sum(v["passed"] == eff[k] for k, v in graded.items())
+            runs = sum(eff.values())
             m["run_pass_rate"] = round(sum(v["passed"] for v in graded.values()) / runs, 2) if runs else None
             n = sum(v["runs"] for v in m["tasks"].values()) or 1
             m["avg_seconds"] = round(m["seconds"] / n, 1)
@@ -395,14 +420,16 @@ def render_report(meta: dict, summary: dict, records: list[dict], models: list[s
                 if not v:
                     cells.append("-")
                 elif v["skipped"] == v["runs"]:
-                    cells.append("skipped")
+                    cells.append("not graded")
                 else:
-                    cells.append(f"{v['passed']}/{v['runs']} {'✅' if v['passed'] * 2 > v['runs'] else '❌'}")
+                    n = v["runs"] - v["skipped"]
+                    cells.append(f"{v['passed']}/{n} {'✅' if v['passed'] * 2 > n else '❌'}")
             L.append(f"| {t} | " + " | ".join(cells) + " |")
         L.append("")
 
     L += ["## Failures", "", "What went wrong, one entry per failed run. Use these to improve the agents.", ""]
-    fails = [r for r in records if not r["passed"] and not r.get("skipped")]
+    problems = [r for r in records if r.get("grading_errors")]
+    fails = [r for r in records if not r["passed"] and not r.get("skipped") and not r.get("incomplete")]
     if not fails:
         L.append("No failures.")
     for r in fails:
@@ -415,6 +442,11 @@ def render_report(meta: dict, summary: dict, records: list[dict], models: list[s
         snippet = " ".join(r.get("answer", "").split())[:240]
         if snippet:
             L.append(f"  - answer starts: \"{snippet}...\"")
+    if problems:
+        L += ["", "## Grading problems (not the agent's fault)", "",
+              "The examiner could not mark these runs. Fix the problem and re-run them.", ""]
+        for r in problems:
+            L.append(f"- {r['agent']} / {r['task']} / {r['model']} / run {r['run']}: {r['grading_errors'][0]}")
     return "\n".join(L) + "\n"
 
 

@@ -33,6 +33,20 @@ def tools_for(lib: Library, agent: Agent, target: str, warn) -> list[str]:
     return tools
 
 
+def agent_body(lib: Library, a: Agent) -> str:
+    """The agent's instructions plus the exact format of the documents it produces (from contracts/)."""
+    outputs = [c for c in (a.meta.get("outputs") or []) if c in lib.contracts]
+    if not outputs:
+        return a.body
+    lines = ["", "# Output documents", "",
+             "Write each document you produce in Markdown, with every required section as a `##` heading, "
+             "in this order. Do not use JSON or other formats for these documents.", ""]
+    for c in outputs:
+        sections = ", ".join(lib.contracts[c]["required_sections"])
+        lines.append(f"- **{c}**: {sections}")
+    return a.body.rstrip() + "\n" + "\n".join(lines) + "\n"
+
+
 def md_with_frontmatter(meta: dict, body: str) -> str:
     fm = yaml.safe_dump(meta, sort_keys=False, allow_unicode=True, width=10_000).strip()
     return f"---\n{fm}\n---\n<!-- {HEADER} -->\n\n{body.lstrip()}"
@@ -55,7 +69,7 @@ def build_claude_code(lib: Library, out: Path, warn) -> None:
         meta["model"] = model_map.get(a.meta.get("model"), "inherit")
         path = out / ".claude" / "agents" / f"{a.name}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(md_with_frontmatter(meta, a.body), encoding="utf-8")
+        path.write_text(md_with_frontmatter(meta, agent_body(lib, a)), encoding="utf-8")
     copy_skills(lib, out / ".claude" / "skills")
 
 
@@ -65,7 +79,7 @@ def build_cursor(lib: Library, out: Path, warn) -> None:
         meta = {"name": a.name, "description": one_line(a.meta["description"])}
         path = out / ".cursor" / "agents" / f"{a.name}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(md_with_frontmatter(meta, a.body), encoding="utf-8")
+        path.write_text(md_with_frontmatter(meta, agent_body(lib, a)), encoding="utf-8")
     copy_skills(lib, out / ".agents" / "skills")
 
 
@@ -78,7 +92,7 @@ def build_gemini_cli(lib: Library, out: Path, warn) -> None:
             meta["tools"] = tools
         path = out / ".gemini" / "agents" / f"{a.name}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(md_with_frontmatter(meta, a.body), encoding="utf-8")
+        path.write_text(md_with_frontmatter(meta, agent_body(lib, a)), encoding="utf-8")
     copy_skills(lib, out / ".agents" / "skills")
 
 
@@ -89,7 +103,7 @@ def toml_str(s: str) -> str:
 def build_codex(lib: Library, out: Path, warn) -> None:
     # VERIFY: Codex agent TOML field names are unconfirmed.
     for a in lib.agents:
-        body = a.body.strip()
+        body = agent_body(lib, a).strip()
         if "'''" in body:
             warn(f"codex: {a.name}: body contains ''' and cannot be a TOML literal string; skipped")
             continue
@@ -119,7 +133,7 @@ def build_prompts(lib: Library, out: Path, warn) -> None:
 
 def system_prompt(lib: Library, a: Agent) -> str:
     """The agent's full instructions with its skills inlined (used by prompts export and evals)."""
-    parts = [f"# {a.name}", "", f"> {one_line(a.meta['description'])}", "", a.body.strip()]
+    parts = [f"# {a.name}", "", f"> {one_line(a.meta['description'])}", "", agent_body(lib, a).strip()]
     for s in a.meta.get("skills") or []:
         _, skill_body, _ = lib.skills[s]
         parts += ["", "---", "", f"<!-- skill: {s} -->", skill_body.strip()]

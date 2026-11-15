@@ -97,6 +97,7 @@ python scripts/eval.py --team engineering \
 | `--runs 1` | One run per task (faster, less reliable) |
 | `--allow-commands` | Run the coding tasks' tests. It runs `pytest` on files the model wrote, inside a temporary folder. Use it only with this repo's tasks |
 | `--model A --model B` | Test several models in one go (they share the same examiner) |
+| `--no-think` | Tells Qwen3 to skip its long thinking phase. Much faster; answers may be a little weaker |
 
 ---
 
@@ -116,6 +117,8 @@ The **Failures** section matters most. Each failure says which check failed and 
 
 ## Tips
 
-- **Speed:** Qwen3 "thinks" before answering, which makes it slower. The runner removes the thinking from answers before marking.
+- **Speed:** Qwen3 "thinks" before answering, which can take several minutes per answer on a laptop. Add `--no-think` to skip it. The runner removes any thinking from answers before marking.
+- **Updating:** after `git pull`, run `pip install -r requirements-evals.txt` again in case new packages were added.
+- **"Grading problems" in the report:** the examiner failed (for example a missing package or a rate limit). Those runs are not counted against the agent; fix the problem and re-run.
 - **Bigger local model:** `ollama pull qwen3:14b` gives better answers but needs most of 16 GB of memory. Close other apps first.
 - **Adding tasks:** every real failure you see while using an agent should become a new task in its `evals/tasks.yaml`. An agent needs 10+ passing tasks to become `verified`.
