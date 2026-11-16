@@ -205,6 +205,8 @@ python scripts/eval.py --team engineering --model ollama_chat/qwen3:8b --judge g
 
 Each run writes a report with a leaderboard, a scorecard per agent and every failure with its reason.
 
+**Results so far:** see **[EVAL_HISTORY.md](EVAL_HISTORY.md)**. The first full baseline (engineering team, Qwen3 8B) passed 10 of 21 tasks.
+
 **Status:** all 51 agents are `draft`. An agent becomes `verified` after passing 10+ eval tasks; the first results will be published as a leaderboard of agents × models.
 
 ---

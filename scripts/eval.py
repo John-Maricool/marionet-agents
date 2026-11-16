@@ -391,8 +391,21 @@ def main() -> int:
 
 def git_commit() -> str:
     try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
-                              text=True, timeout=10).stdout.strip()
+        out = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
+                             text=True, timeout=10).stdout.strip()
+        if out:
+            return out
+    except Exception:  # noqa: BLE001
+        pass
+    try:  # fall back to reading .git directly
+        head = (ROOT / ".git" / "HEAD").read_text().strip()
+        if head.startswith("ref: "):
+            ref = ROOT / ".git" / head[5:]
+            if ref.exists():
+                return ref.read_text().strip()[:7]
+            packed = (ROOT / ".git" / "packed-refs").read_text()
+            return next(l.split()[0][:7] for l in packed.splitlines() if l.endswith(head[5:]))
+        return head[:7]
     except Exception:  # noqa: BLE001
         return ""
 
