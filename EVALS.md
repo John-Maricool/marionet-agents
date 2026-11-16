@@ -118,6 +118,8 @@ The **Failures** section matters most. Each failure says which check failed and 
 ## Tips
 
 - **Speed:** Qwen3 "thinks" before answering, which can take several minutes per answer on a laptop. Add `--no-think` to skip it. The runner removes any thinking from answers before marking.
+- **Long runs:** the full engineering team with 3 runs can take 1-3 hours on a laptop. Put `caffeinate -i` in front of the command (for example `caffeinate -i python scripts/eval.py ...`) so your Mac does not sleep, and keep it plugged in.
+- **One run is not enough:** small models can pass a task once and fail it the next time. Judge an agent on 3 runs.
 - **Updating:** after `git pull`, run `pip install -r requirements-evals.txt` again in case new packages were added.
 - **"Grading problems" in the report:** the examiner failed (for example a missing package or a rate limit). Those runs are not counted against the agent; fix the problem and re-run.
 - **Bigger local model:** `ollama pull qwen3:14b` gives better answers but needs most of 16 GB of memory. Close other apps first.

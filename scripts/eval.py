@@ -32,7 +32,7 @@ from pathlib import Path
 from convert import system_prompt
 from library import ROOT, load_library, load_yaml
 
-FENCE = re.compile(r"```([^\n`]*)\n(.*?)```", re.S)
+FILE_OPEN = re.compile(r"^[ \t]*```([^\n`]*[\w-]\.\w+[^\n`]*)\n", re.M)
 PATHLIKE = re.compile(r"^[\w./-]+\.\w+$")
 THINK = re.compile(r"<think>.*?</think>", re.S | re.I)
 CODE_GRADERS = {"contract", "contains", "not_contains", "command"}
@@ -134,18 +134,21 @@ def build_user_message(task: dict, files: dict[str, str]) -> str:
 
 
 def changed_files(answer: str) -> dict[str, str]:
-    """Files the model returned. Accepts ```file:app.py, ```python file:app.py, ```python:app.py and ```app.py."""
+    """Files the model returned. Accepts ```file:app.py, ```python file:app.py, ```python:app.py and ```app.py.
+
+    File blocks are found by their opening line, so they are still found when a model wraps its whole
+    answer in another code block (for example ```pull_request ... ```).
+    """
     files: dict[str, str] = {}
-    for info, body in FENCE.findall(answer):
-        info = info.strip()
-        m = re.search(r"file:\s*(\S+)", info)
-        if m:
-            path = m.group(1)
-        else:
-            last = re.split(r"[\s:]+", info)[-1] if info else ""
-            path = last if PATHLIKE.match(last) else ""
-        if path:
-            files[path] = body
+    for m in FILE_OPEN.finditer(answer):
+        info = m.group(1).strip()
+        found = re.search(r"file:\s*(\S+)", info)
+        path = found.group(1) if found else re.split(r"[\s:]+", info)[-1]
+        if not PATHLIKE.match(path):
+            continue
+        body_start = m.end()
+        close = re.compile(r"^[ \t]*```[ \t]*$", re.M).search(answer, body_start)
+        files[path] = answer[body_start: close.start() if close else len(answer)]
     return files
 
 
