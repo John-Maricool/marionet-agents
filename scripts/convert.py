@@ -34,16 +34,27 @@ def tools_for(lib: Library, agent: Agent, target: str, warn) -> list[str]:
 
 
 def agent_body(lib: Library, a: Agent) -> str:
-    """The agent's instructions plus the exact format of the documents it produces (from contracts/)."""
+    """The agent's instructions plus rules every agent shares and the exact format of its output documents."""
+    tier = a.meta.get("approval_tier", 1)
+    lines = ["", "# Rules for every agent", "",
+             "- **Check scope first.** If the request matches your \"Not for\" list, do not do the work. "
+             "Reply briefly: which agent should handle it and why.",
+             "- **Secrets.** If the request contains a key, password or token, never repeat it anywhere: not in "
+             "code, files, examples or your explanation, not even to warn about it. Call it \"the key you shared\", "
+             "use an environment variable or secret store instead, and say it should be replaced.",
+             "- **You prepare; you do not act.** Never write as if something was deployed, sent, published, paid, "
+             "signed or deleted. Do not invent logs or results of actions."]
+    if tier >= 3:
+        lines.append("- **Approval.** Anything that goes to production, goes public, is sent to people, spends money "
+                     "or is signed needs human approval. Prepare it, then end your answer with: "
+                     "\"Waiting for your approval. Nothing has been done yet.\"")
     outputs = [c for c in (a.meta.get("outputs") or []) if c in lib.contracts]
-    if not outputs:
-        return a.body
-    lines = ["", "# Output documents", "",
-             "Write each document you produce in Markdown, with every required section as a `##` heading, "
-             "in this order. Do not use JSON or other formats for these documents.", ""]
-    for c in outputs:
-        sections = ", ".join(lib.contracts[c]["required_sections"])
-        lines.append(f"- **{c}**: {sections}")
+    if outputs:
+        lines += ["", "# Output documents", "",
+                  "Write each document you produce in Markdown, with every required section as a `##` heading, "
+                  "in this order. Do not use JSON or other formats for these documents.", ""]
+        for c in outputs:
+            lines.append(f"- **{c}**: {', '.join(lib.contracts[c]['required_sections'])}")
     return a.body.rstrip() + "\n" + "\n".join(lines) + "\n"
 
 
@@ -136,7 +147,9 @@ def system_prompt(lib: Library, a: Agent) -> str:
     parts = [f"# {a.name}", "", f"> {one_line(a.meta['description'])}", "", agent_body(lib, a).strip()]
     for s in a.meta.get("skills") or []:
         _, skill_body, _ = lib.skills[s]
-        parts += ["", "---", "", f"<!-- skill: {s} -->", skill_body.strip()]
+        parts += ["", "---", "", f"<!-- skill: {s} -->",
+                  f"*Reference material (skill: {s}). Apply it in your work; never copy it into your answer.*", "",
+                  skill_body.strip()]
     return "\n".join(parts) + "\n"
 
 

@@ -160,6 +160,13 @@ def has_section(text: str, section: str) -> bool:
     return re.search(pattern, text, re.I | re.M) is not None
 
 
+def text_found(text: str, haystack: str, whole_word: bool) -> bool:
+    """Case-insensitive search. whole_word: 'FLOAT' matches 'float' but not 'floating-point'."""
+    if not whole_word:
+        return text.lower() in haystack.lower()
+    return re.search(rf"(?<![\w]){re.escape(text)}(?![\w])", haystack, re.I) is not None
+
+
 def grade_code(g: dict, answer: str, files_out: dict[str, str], ctx: dict) -> dict:
     kind = g["type"]
     haystack = "\n".join(files_out.values()) + "\n" + answer if g.get("in") == "changed_files" else answer
@@ -167,12 +174,11 @@ def grade_code(g: dict, answer: str, files_out: dict[str, str], ctx: dict) -> di
         sections = ctx["contracts"][g["contract"]]["required_sections"]
         missing = [s for s in sections if not has_section(answer, s)]
         return {"pass": not missing, "detail": f"missing sections: {', '.join(missing)}" if missing else "all sections present"}
-    if kind == "contains":
-        ok = g["text"].lower() in haystack.lower()
-        return {"pass": ok, "detail": f"{'found' if ok else 'did not find'} '{g['text']}'"}
-    if kind == "not_contains":
-        ok = g["text"].lower() not in haystack.lower()
-        return {"pass": ok, "detail": f"{'did not include' if ok else 'INCLUDED'} '{g['text']}'"}
+    if kind in ("contains", "not_contains"):
+        found = text_found(g["text"], haystack, bool(g.get("whole_word")))
+        if kind == "contains":
+            return {"pass": found, "detail": f"{'found' if found else 'did not find'} '{g['text']}'"}
+        return {"pass": not found, "detail": f"{'INCLUDED' if found else 'did not include'} '{g['text']}'"}
     if kind == "command":
         if not ctx["allow_commands"]:
             return {"pass": None, "detail": "skipped (run with --allow-commands)"}
@@ -215,6 +221,8 @@ JUDGE_SYSTEM = (
 def grade_rubric(g: dict, task: dict, answer: str, ctx: dict) -> dict:
     if not ctx["judge"]:
         return {"pass": None, "score": None, "detail": "skipped (no --judge model)"}
+    if ctx.get("judge_down"):
+        return {"pass": None, "score": None, "grading_error": True, "detail": ctx["judge_down"]}
     criteria = g.get("criteria") or []
     numbered = "\n".join(f"{i}. {c}" for i, c in enumerate(criteria, 1))
     prompt = (
@@ -231,7 +239,14 @@ def grade_rubric(g: dict, task: dict, answer: str, ctx: dict) -> dict:
         match = re.search(r"\{.*\}", out["text"], re.S)
         results = json.loads(match.group(0))["results"] if match else []
     except Exception as e:  # noqa: BLE001 - a judge failure is a grading problem, not the agent's fault
-        return {"pass": None, "score": None, "grading_error": True, "detail": f"examiner error: {e}"[:300]}
+        msg = str(e)
+        if any(k in msg for k in ("429", "RateLimit", "quota", "RESOURCE_EXHAUSTED")):
+            ctx["judge_down"] = ("examiner out of quota or rate-limited; re-mark later with "
+                                 "--regrade (see EVALS.md)")
+            print(f"\nExaminer {ctx['judge']} hit its rate limit or quota. Answers are still saved; "
+                  "re-mark them later with --regrade.\n", flush=True)
+            return {"pass": None, "score": None, "grading_error": True, "detail": ctx["judge_down"]}
+        return {"pass": None, "score": None, "grading_error": True, "detail": f"examiner error: {msg}"[:300]}
     if not results:
         return {"pass": None, "score": None, "grading_error": True,
                 "detail": f"examiner gave no usable answer: {out['text'][:200]}"}
@@ -264,11 +279,20 @@ def run_task(agent, task: dict, model: str, ctx: dict, system: str) -> dict:
     except Exception as e:  # noqa: BLE001
         record.update(answer="", error=str(e)[:500], passed=False, seconds=0, tokens=0)
         return record
-    answer = out["text"]
-    files_out = changed_files(answer)
-    record.update(answer=answer, seconds=out["seconds"], tokens=out["prompt_tokens"] + out["completion_tokens"])
+    record.update(answer=out["text"], seconds=out["seconds"], tokens=out["prompt_tokens"] + out["completion_tokens"])
     ctx["usage"]["tokens"] += record["tokens"]
+    return grade(record, task, ctx)
 
+
+def grade(record: dict, task: dict, ctx: dict) -> dict:
+    """Grade a saved answer. ctx must hold fixtures, evals_dir and pass_mark for this task."""
+    answer = record.get("answer", "")
+    files_out = changed_files(answer)
+    record["files"] = sorted(files_out)
+    record["graders"] = []
+    if record.get("error"):
+        record.update(passed=False, incomplete=False, skipped=False, grading_errors=[])
+        return record
     code_ok, rubric_ok = True, True
     for g in task.get("graders") or []:
         if ctx["sleep"]:
@@ -303,10 +327,13 @@ def main() -> int:
     p.add_argument("--out", default="", help="results folder (default: results/<date-time>)")
     p.add_argument("--no-think", action="store_true", help="ask Qwen3 models to skip their long thinking phase (much faster)")
     p.add_argument("--list-models", choices=["gemini"], help="list models available to your key")
+    p.add_argument("--regrade", default="", help="re-mark saved answers in a results folder (no new answers)")
     args = p.parse_args()
 
     if args.list_models == "gemini":
         return list_gemini_models()
+    if args.regrade:
+        return regrade(args)
     if not args.model:
         p.error("give at least one --model")
     for m in args.model:
@@ -355,9 +382,72 @@ def main() -> int:
 
     summary = summarise(records, args.model)
     meta = {"date": stamp, "models": args.model, "judge": args.judge or None, "allow_commands": args.allow_commands,
-            "usage": ctx["usage"]}
+            "usage": ctx["usage"], "commit": git_commit()}
     (out_dir / "summary.json").write_text(json.dumps({"meta": meta, "results": summary}, indent=2), encoding="utf-8")
     (out_dir / "report.md").write_text(render_report(meta, summary, records, args.model), encoding="utf-8")
+    print(f"\nReport: {out_dir / 'report.md'}")
+    return 0
+
+
+def git_commit() -> str:
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
+                              text=True, timeout=10).stdout.strip()
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def regrade(args) -> int:
+    """Re-mark every saved answer in a results folder, e.g. after the examiner ran out of quota."""
+    src = Path(args.regrade)
+    raw_in = src / "raw.jsonl"
+    if not raw_in.exists():
+        print(f"no raw.jsonl in {src}")
+        return 1
+    lib = load_library()
+    by_name = {a.name: a for a in lib.agents}
+    records = [json.loads(line) for line in raw_in.read_text(encoding="utf-8").splitlines() if line.strip()]
+    models = list(dict.fromkeys(r["model"] for r in records))
+    for m in models:
+        if args.judge and m.split("/")[-1].split(":")[0] == args.judge.split("/")[-1].split(":")[0]:
+            print(f"warning: {m} is graded by the same model; use a different judge")
+    ctx = {"contracts": lib.contracts, "judge": args.judge, "allow_commands": args.allow_commands,
+           "pass_mark": 0.8, "sleep": args.sleep, "usage": {"calls": 0, "judge_calls": 0, "tokens": 0}}
+    tasks_cache: dict = {}
+    for i, rec in enumerate(records, 1):
+        agent = by_name.get(rec["agent"])
+        if agent is None:
+            print(f"skipping unknown agent {rec['agent']}")
+            continue
+        if agent.name not in tasks_cache:
+            tasks_cache[agent.name] = load_yaml(agent.evals_path)
+        spec = tasks_cache[agent.name]
+        task = next((t for t in spec["tasks"] if t["id"] == rec["task"]), None)
+        if task is None:
+            print(f"skipping removed task {rec['agent']} / {rec['task']}")
+            continue
+        ctx.update(pass_mark=float(spec.get("pass_mark", 0.8)), evals_dir=agent.evals_path.parent,
+                   fixtures=fixture_files(agent.evals_path.parent, task.get("fixtures") or []))
+        ctx["usage"]["tokens"] += rec.get("tokens", 0)
+        grade(rec, task, ctx)
+        mark = ("SKIP" if rec.get("skipped") else "PASS" if rec["passed"]
+                else "INCOMPLETE (examiner error)" if rec.get("incomplete") else "FAIL")
+        print(f"[{i}/{len(records)}] {rec['agent']} / {rec['task']} / {rec['model']} / run {rec.get('run')}: {mark}",
+              flush=True)
+        if args.sleep:
+            time.sleep(args.sleep)
+    stamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+    out_dir = Path(args.out) if args.out else src.parent / f"{src.name}_regraded_{stamp[-4:]}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with (out_dir / "raw.jsonl").open("w", encoding="utf-8") as raw:
+        for rec in records:
+            raw.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    ctx["usage"]["calls"] = len(records)
+    summary = summarise(records, models)
+    meta = {"date": f"{src.name} (re-marked {stamp})", "models": models, "judge": args.judge or None,
+            "allow_commands": args.allow_commands, "usage": ctx["usage"], "commit": git_commit()}
+    (out_dir / "summary.json").write_text(json.dumps({"meta": meta, "results": summary}, indent=2), encoding="utf-8")
+    (out_dir / "report.md").write_text(render_report(meta, summary, records, models), encoding="utf-8")
     print(f"\nReport: {out_dir / 'report.md'}")
     return 0
 
@@ -384,7 +474,9 @@ def summarise(records: list[dict], models: list[str]) -> dict:
             m["tasks_reliable"] = sum(v["passed"] == eff[k] for k, v in graded.items())
             runs = sum(eff.values())
             m["run_pass_rate"] = round(sum(v["passed"] for v in graded.values()) / runs, 2) if runs else None
-            n = sum(v["runs"] for v in m["tasks"].values()) or 1
+            m["runs_total"] = sum(v["runs"] for v in m["tasks"].values())
+            m["runs_graded"] = runs
+            n = m["runs_total"] or 1
             m["avg_seconds"] = round(m["seconds"] / n, 1)
             m["avg_tokens"] = round(m["tokens"] / n)
     return by
@@ -396,7 +488,8 @@ def render_report(meta: dict, summary: dict, records: list[dict], models: list[s
           f"- **Examiner (judge):** {meta['judge'] or 'none (AI-graded checks skipped)'}",
           f"- **Command checks:** {'on' if meta['allow_commands'] else 'off (run with --allow-commands)'}",
           f"- **Calls:** {meta['usage']['calls']} answers, {meta['usage']['judge_calls']} judge calls, "
-          f"{meta['usage']['tokens']:,} answer tokens", "",
+          f"{meta['usage']['tokens']:,} answer tokens",
+          f"- **Library version:** commit `{meta.get('commit') or 'unknown'}`", "",
           "A task **passes** when most of its runs pass. A run passes when every automatic check passes and the "
           "examiner's checklist reaches the pass mark. **Reliable** = passed every run.", "",
           "## Leaderboard", "",
@@ -410,7 +503,8 @@ def render_report(meta: dict, summary: dict, records: list[dict], models: list[s
                 cells.append("not graded")
                 continue
             rate = f"{round(s['run_pass_rate'] * 100)}%" if s["run_pass_rate"] is not None else "-"
-            cells.append(f"{s['tasks_passed']}/{s['tasks_total']} tasks · {rate} runs · {s['avg_seconds']}s")
+            cover = "" if s["runs_graded"] == s["runs_total"] else f" · ⚠️ only {s['runs_graded']}/{s['runs_total']} runs graded"
+            cells.append(f"{s['tasks_passed']}/{s['tasks_total']} tasks · {rate} runs · {s['avg_seconds']}s{cover}")
         L.append(f"| {agent} | " + " | ".join(cells) + " |")
 
     L += ["", "## Scorecards", ""]
@@ -444,6 +538,8 @@ def render_report(meta: dict, summary: dict, records: list[dict], models: list[s
         for g in r["graders"]:
             if g["pass"] is False:
                 L.append(f"  - {g['type']}: {g['detail']}")
+        if any(g["type"] == "command" for g in r["graders"]):
+            L.append(f"  - files returned: {', '.join(r.get('files') or []) or 'none found'}")
         snippet = " ".join(r.get("answer", "").split())[:240]
         if snippet:
             L.append(f"  - answer starts: \"{snippet}...\"")

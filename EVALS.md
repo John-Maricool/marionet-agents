@@ -12,7 +12,9 @@ The eval runner gives each agent its test tasks, sends them to an LLM, marks the
 
 Each task runs 3 times per model. A task **passes** when most runs pass. **Reliable** means it passed every run.
 
-The examiner must be a different model from the one being tested, so we swap them: Gemini marks the local model's answers, and the local model marks Gemini's.
+The examiner must be a different model family from the one being tested (models mark their own answers too kindly).
+
+**Recommended free setup:** Qwen3 (by Alibaba) answers, Gemma 3 (by Google) marks, both running on your Mac with no limits. Gemini's free tier is useful for spot-checks, but its daily quota runs out after a couple of dozen marks.
 
 ---
 
@@ -23,7 +25,8 @@ The examiner must be a different model from the one being tested, so we swap the
 Download Ollama from [ollama.com](https://ollama.com) (or `brew install ollama`) and open it. Then in Terminal:
 
 ```bash
-ollama pull qwen3:8b      # about 5 GB; fits comfortably in 16 GB of memory
+ollama pull qwen3:8b      # the model being tested, about 5 GB
+ollama pull gemma3:12b    # the examiner, about 8 GB (use gemma3:4b if memory is tight)
 ```
 
 ### 2. Set up Python for the evals
@@ -37,7 +40,7 @@ pip install -r requirements-evals.txt
 
 Run `source .venv/bin/activate` again whenever you open a new Terminal window.
 
-### 3. Add your Gemini key (privately)
+### 3. Optional: add a Gemini key (privately)
 
 Create a free key at [Google AI Studio](https://aistudio.google.com/apikey). Then, in Terminal:
 
@@ -47,7 +50,7 @@ export GEMINI_API_KEY="paste-your-key-here"
 
 To keep it for future Terminal windows, add that line to `~/.zshrc`. **Never** put the key in a file inside this repo or paste it in a chat. If it has been shared, delete it in AI Studio and create a new one.
 
-### 4. Find the Gemini model name
+### 4. Optional: find the Gemini model name
 
 ```bash
 python scripts/eval.py --list-models gemini
@@ -57,7 +60,37 @@ Pick a **Flash** model from the list (at the time of writing, `gemini/gemini-3.8
 
 ---
 
-## Run the evals
+## Run the evals (recommended: answer first, mark second)
+
+Running both local models at the same time makes them swap in and out of memory. It is faster to collect all the answers first, then mark them in one go.
+
+**Step 1: collect answers** (no examiner; code checks still run). Takes 1-3 hours for the engineering team:
+
+```bash
+caffeinate -i python scripts/eval.py --team engineering \
+  --model ollama_chat/qwen3:8b --allow-commands --no-think
+```
+
+**Step 2: mark them** with the local examiner (use the folder name printed at the end of step 1):
+
+```bash
+python scripts/eval.py --regrade results/2026-11-16_0113 \
+  --judge ollama_chat/gemma3:12b --allow-commands
+```
+
+This writes a new folder ending in `_regraded_HHMM` with the full report.
+
+### Re-marking (`--regrade`)
+
+`--regrade` marks saved answers again without asking the model to answer again. Use it when:
+
+- the examiner ran out of quota or failed (the report says **"⚠️ only X/Y runs graded"**),
+- you want a second opinion from another examiner,
+- a test was fixed, and you want old answers marked with the corrected test.
+
+It does **not** pick up changes to an agent's instructions; for that, collect new answers.
+
+## Other ways to run
 
 ### Start small (about 5 minutes)
 
@@ -97,6 +130,7 @@ python scripts/eval.py --team engineering \
 | `--runs 1` | One run per task (faster, less reliable) |
 | `--allow-commands` | Run the coding tasks' tests. It runs `pytest` on files the model wrote, inside a temporary folder. Use it only with this repo's tasks |
 | `--model A --model B` | Test several models in one go (they share the same examiner) |
+| `--regrade results/<folder>` | Mark saved answers again (no new answers) |
 | `--no-think` | Tells Qwen3 to skip its long thinking phase. Much faster; answers may be a little weaker |
 
 ---
