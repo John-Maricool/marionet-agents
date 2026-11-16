@@ -128,7 +128,10 @@ def build_user_message(task: dict, files: dict[str, str]) -> str:
         note += "Each file block REPLACES the whole file, so always return the entire file, including every "
         note += "function and import you did not change. Never return only the changed part."
         if command:
-            note += f" Your files will be checked by running `{command['run']}` in a folder containing these files."
+            note = ("\n## You must return code\nThis task is checked by running tests on your files, so describing the "
+                    "change is not enough: include every file you changed as a ```file:<path> block (for example "
+                    "```file:app.py). " + note.split("\n", 2)[-1])
+            note += f" The check runs `{command['run']}` in a folder containing these files."
         parts.append(note)
     return "\n".join(parts)
 
@@ -310,6 +313,8 @@ def grade(record: dict, task: dict, ctx: dict) -> dict:
     record["passed"] = bool(graded) and code_ok and rubric_ok and not record["grading_errors"]
     record["incomplete"] = bool(record["grading_errors"]) and code_ok
     record["skipped"] = not graded and not record["grading_errors"]
+    record["code_only"] = any(r["type"] == "rubric" and r["pass"] is None and not r.get("grading_error")
+                              for r in record["graders"])
     return record
 
 
@@ -476,6 +481,7 @@ def summarise(records: list[dict], models: list[str]) -> dict:
         t["passed"] += int(r["passed"])
         # runs the examiner could not grade (and that passed every code check) do not count either way
         t["skipped"] += int(bool(r.get("skipped") or r.get("incomplete")))
+        t["code_only"] = t.get("code_only", False) or bool(r.get("code_only"))
         a["seconds"] += r.get("seconds", 0)
         a["tokens"] += r.get("tokens", 0)
     for agent in by.values():
@@ -488,6 +494,7 @@ def summarise(records: list[dict], models: list[str]) -> dict:
             runs = sum(eff.values())
             m["run_pass_rate"] = round(sum(v["passed"] for v in graded.values()) / runs, 2) if runs else None
             m["runs_total"] = sum(v["runs"] for v in m["tasks"].values())
+            m["code_only"] = any(v.get("code_only") for v in m["tasks"].values())
             m["runs_graded"] = runs
             n = m["runs_total"] or 1
             m["avg_seconds"] = round(m["seconds"] / n, 1)
@@ -503,6 +510,8 @@ def render_report(meta: dict, summary: dict, records: list[dict], models: list[s
           f"- **Calls:** {meta['usage']['calls']} answers, {meta['usage']['judge_calls']} judge calls, "
           f"{meta['usage']['tokens']:,} answer tokens",
           f"- **Library version:** commit `{meta.get('commit') or 'unknown'}`", "",
+          *(["> **Not a final score.** No examiner was used, so checklist items are not marked yet and results "
+             "reflect automatic checks only. Mark them with `--regrade` (see EVALS.md).", ""] if not meta["judge"] else []),
           "A task **passes** when most of its runs pass. A run passes when every automatic check passes and the "
           "examiner's checklist reaches the pass mark. **Reliable** = passed every run.", "",
           "## Leaderboard", "",
@@ -517,6 +526,8 @@ def render_report(meta: dict, summary: dict, records: list[dict], models: list[s
                 continue
             rate = f"{round(s['run_pass_rate'] * 100)}%" if s["run_pass_rate"] is not None else "-"
             cover = "" if s["runs_graded"] == s["runs_total"] else f" · ⚠️ only {s['runs_graded']}/{s['runs_total']} runs graded"
+            if s.get("code_only"):
+                cover += " · checklist not marked yet"
             cells.append(f"{s['tasks_passed']}/{s['tasks_total']} tasks · {rate} runs · {s['avg_seconds']}s{cover}")
         L.append(f"| {agent} | " + " | ".join(cells) + " |")
 
